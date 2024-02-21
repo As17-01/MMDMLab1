@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "mmdmlab1"
+version = "0.1.0"
+description = "MMDM Lab 1"
+authors = ["As17-01 <aseliverstov@nes.ru>", "d1scob4ll", "Sandrobus228"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

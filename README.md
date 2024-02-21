@@ -1,0 +1,1 @@
+# Modern Methods of Decision Making. Lab 1
