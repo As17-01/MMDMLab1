@@ -56,7 +56,10 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
             new_pops.append(self._mating_function([candidate0, candidate1], axis=0))
 
-        self._state._population = np.append(self._state._population, np.array(new_pops), axis=0)
+        new_pops_array = np.array(new_pops)
+        self._state._population = np.append(
+            self._state._population, new_pops_array, axis=0
+        )
 
     def get_best(self) -> Sequence[float]:
         scores = []
