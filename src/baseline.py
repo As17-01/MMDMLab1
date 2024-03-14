@@ -46,6 +46,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         while len(new_population) < num_to_keep:
             weights = np.random.uniform(0, 1, size=len(self._eval_functions))
 
+            # TODO: Delete andom comment
             new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
             new_population.append(self._state._population[new_pop_id])
             eval_results[new_pop_id] = np.array([np.inf] * len(self._eval_functions))
