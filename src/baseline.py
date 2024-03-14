@@ -12,14 +12,16 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
     def __init__(
         self,
         state: GeneticAlgorithmState,
-        eval_function: Callable,
+        eval_functions: Sequence[Callable],
         mutation_function: Callable,
         mating_function: Callable,
+        random_state: int = 99,
     ):
         self._state = state
-        self._eval_function = eval_function
+        self._eval_functions = eval_functions
         self._mutation_function = mutation_function
         self._mating_function = mating_function
+        self._random_state = random_state
 
     def mutate(self, delta: float) -> None:
         # Note that this might break constraints
@@ -31,16 +33,24 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
     def select(self, keep_share: float) -> None:
         num_to_keep = int(self._state._population_size * keep_share)
-
-        scores = []
-        for pop in self._state._population:
-            scores.append(self._eval_function(pop))
+        np.random.seed(self._random_state + int(np.max(self._state._population) - np.min(self._state._population) * 215))
 
         # Note that this minimizes the scores
-        order = np.argsort(scores)
-        new_pops = self._state._population[order[:num_to_keep]]
+        eval_results = []
+        for pop in self._state._population:
+            pop_eval_result = [f(pop) for f in self._eval_functions]
+            eval_results.append(pop_eval_result)
+        eval_results = np.array(eval_results)
 
-        self._state._population = new_pops
+        new_population = []
+        while len(new_population) < num_to_keep:
+            weights = np.random.uniform(0, 1, size=len(self._eval_functions))
+
+            new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
+            new_population.append(self._state._population[new_pop_id])
+            eval_results[new_pop_id] = np.array([np.inf] * len(self._eval_functions))
+
+        self._state._population = np.array(new_population)
 
     def mate(self) -> None:
         # Keep the best iterations then add mated ones
@@ -61,11 +71,18 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             self._state._population, new_pops_array, axis=0
         )
 
-    def get_best(self) -> Sequence[float]:
-        scores = []
+    def get_best(self) -> Sequence[Sequence[float]]:
+        eval_results = []
         for pop in self._state._population:
-            scores.append(self._eval_function(pop))
+            pop_eval_result = [f(pop) for f in self._eval_functions]
+            eval_results.append(pop_eval_result)
+        eval_results = np.array(eval_results)
 
-        min_id = np.argmin(scores)
-        best_pop = self._state._population[min_id]
-        return best_pop
+        scores = []
+        for pop_eval in eval_results:
+            ordering_score = np.sum(np.all(eval_results < pop_eval, axis=1))
+            scores.append(ordering_score)
+
+        min_ids = np.array(scores) == 0
+        best_pops = self._state._population[min_ids]
+        return best_pops
