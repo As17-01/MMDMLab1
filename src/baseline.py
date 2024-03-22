@@ -33,7 +33,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
     def select(self, keep_share: float) -> None:
         num_to_keep = int(self._state._population_size * keep_share)
-        np.random.seed(self._random_state + int(np.max(self._state._population) - np.min(self._state._population) * 215))
+        np.random.seed(self._random_state + int(np.max(self._state._population) - np.min(self._state._population) * 21))
 
         # Note that this minimizes the scores
         eval_results = []
