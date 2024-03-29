@@ -49,9 +49,8 @@ class CourierPopulation:
         self._population = []
         for _ in range(self.population_size):
 
-            points = np.arange(1, self.num_points + 1)
-            np.random.shuffle(points)
-
+            points = np.random.choice(self.num_points, self.num_points, replace=False)
+            
             distribution = [[point] for point in points[:self.num_couriers]]
 
             remaining_points = points[self.num_couriers:]
