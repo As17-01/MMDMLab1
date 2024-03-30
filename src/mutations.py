@@ -11,6 +11,7 @@ def square_mutation(coordinates: Sequence[float], delta: float) -> Sequence[floa
 
     return new_coordinates
 
+
 def courier_mutation(courier, delta=1, random_state=None):
     
     num_couriers = len(courier)
