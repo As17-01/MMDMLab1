@@ -3,12 +3,20 @@ from typing import Sequence
 import numpy as np
 
 
+def square_mutation(coordinates: Sequence[float], delta: float, random_state: int) -> Sequence[float]:
+    np.random.seed(random_state)
+    new_coordinates = np.array(coordinates)
+
+    distance = np.random.uniform(low=-delta, high=delta, size=len(coordinates))
+    new_coordinates = new_coordinates + distance
+
+    return new_coordinates.tolist()
+
 def reallocate_randomly(city: int, distribution, random_state: int):
     distribution = distribution.copy()
     np.random.seed(random_state)
 
     num_couriers = len(distribution)
-
     distribution = [path[path != city] for path in distribution]
     
     recipient_idx = np.random.randint(num_couriers)
@@ -21,17 +29,6 @@ def reallocate_randomly(city: int, distribution, random_state: int):
 
     distribution[recipient_idx] = np.insert(distribution[recipient_idx], place_idx, city)
     return distribution
-
-
-def square_mutation(coordinates: Sequence[float], delta: float, random_state: int) -> Sequence[float]:
-    np.random.seed(random_state)
-    new_coordinates = np.array(coordinates)
-
-    distance = np.random.uniform(low=-delta, high=delta, size=len(coordinates))
-    new_coordinates = new_coordinates + distance
-
-    return new_coordinates
-
 
 def courier_mutation(distribution: Sequence[np.ndarray], delta: float, random_state: int):
     np.random.seed(random_state)

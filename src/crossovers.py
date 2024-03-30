@@ -5,9 +5,9 @@ import numpy as np
 
 from src.mutations import reallocate_randomly
 
-def mean_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
+def mean_crossover(parents: Sequence[List[List[float]]], random_state: Optional[int] = None):
     np.random.seed(random_state)
-    return np.mean(parents, axis=0)
+    return np.mean(parents, axis=0).tolist()
 
 
 def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
