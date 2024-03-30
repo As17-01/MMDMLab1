@@ -3,7 +3,8 @@ from typing import Sequence
 import numpy as np
 
 
-def square_mutation(coordinates: Sequence[float], delta: float) -> Sequence[float]:
+def square_mutation(coordinates: Sequence[float], delta: float, random_state: int) -> Sequence[float]:
+    np.random.seed(random_state)
     new_coordinates = np.array(coordinates)
 
     distance = np.random.uniform(low=-delta, high=delta, size=len(coordinates))
@@ -12,20 +13,19 @@ def square_mutation(coordinates: Sequence[float], delta: float) -> Sequence[floa
     return new_coordinates
 
 
-def courier_mutation(courier, delta=1, random_state=None):
-    
-    num_couriers = len(courier)
-    
-    for _ in range(delta):
-        donor_idx = np.random.choice([i for i, points in enumerate(courier) if len(points) > 1])
+def courier_mutation(distribution: Sequence[np.ndarray], delta: float, random_state: int):
+    np.random.seed(random_state)
+    num_couriers = len(distribution)
 
-        point_idx = np.random.randint(len(courier[donor_idx]))
-        point_to_move = courier[donor_idx].pop(point_idx)
+    num_jumps = int(np.random.exponential(delta))
+    all_cities = {x for l in distribution for x in l}
+    
+    for _ in range(num_jumps):
+        city = np.random.choice(all_cities, 1, replace=False)
         
-        recipient_idxs = list(range(num_couriers))
-        recipient_idxs.remove(donor_idx)
-        recipient_idx = np.random.choice(recipient_idxs)
+        new_distribution = [ar.pop(city) for ar in new_distribution if city in ar]
         
-        courier[recipient_idx].append(point_to_move)
+        recipient_idx = np.random.randint(num_couriers)
+        new_distribution[recipient_idx] = new_distribution[recipient_idx] + np.array(city)
 
-    return courier
+    return new_distribution

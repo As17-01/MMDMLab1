@@ -37,11 +37,11 @@ class DotsGeneticAlgorithmState(BaseGeneticAlgorithmState):
 
         np.random.seed(random_state)
 
-        self._population = np.random.uniform(
+        self._population = list(np.random.uniform(
             low=constraints[0],
             high=constraints[1],
             size=(population_size, dimension_size),
-        )
+        ))
 
 
 class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
@@ -64,7 +64,7 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
             raise ValueError("Количество пунктов должно быть не меньше количества курьеров.")
 
         self._population = []
-        while len(self._population) < self._population_size:
+        for _ in range(self._population_size):
             self._population.append(self._generate_distibution())
 
         self._population = self._population

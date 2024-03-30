@@ -1,37 +1,36 @@
 
-from typing import Optional, List
+from typing import Optional, Sequence, List
 
 import numpy as np
 
-def crossover(parents: List[List[List[int]]], random_state: Optional[int] = None) -> List[List[int]]:
+
+def mean_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
+    np.random.seed(random_state)
+    return np.mean(parents, axis=0)
+
+
+def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
     np.random.seed(random_state)
     
-    parent1_index, parent2_index = np.random.choice(len(parents), 2, replace=False)
-    parent1, parent2 = parents[parent1_index], parents[parent2_index]
-    
-    courier_index = np.random.randint(len(parent1))
+    parent1_idx, parent2_idx = np.random.choice(len(parents), 2, replace=False)
+    parent1, parent2 = parents[parent1_idx], parents[parent2_idx]
 
-    child = [list(courier) for courier in parent1]
-    
-    child[courier_index] = list(parent2[courier_index])
-    
-    all_points = set(range(1, max(max(courier) for courier in parent1) + 1))
+    child = parent1.copy()
+    cross_courier_idx = np.random.randint(len(parent1))
 
-    new_courier_points = set(child[courier_index])
-    for i, courier in enumerate(child):
-        if i != courier_index:
-            courier_points = set(courier)
-            courier[:] = list(courier_points - new_courier_points)
-            new_courier_points |= courier_points
+    all_cities = {x for l in child for x in l}
+    exhanged_cities = set(*parent2[cross_courier_idx])
 
-    missing_points = all_points - new_courier_points
-    for point in missing_points:
-        min_len_courier_index = min((len(courier), i) for i, courier in enumerate(child) if i != courier_index)[1]
-        child[min_len_courier_index].append(point)
+    # Remove cities from array, which are exchanged
+    for exch_city in exhanged_cities:
+        child = [ar.pop(exch_city) for ar in child if exch_city in ar]
+    child[cross_courier_idx] = parent2[cross_courier_idx]
 
-    for courier in child:
-        if len(courier) == 0:
-            idx = np.random.randint(0, len(child[courier_index]))
-            courier.append(child[courier_index].pop(idx))
-    
+    # If a city is missing, add it to a random courier
+    new_cities = {x for l in child for x in l}
+    for missing_city in all_cities:
+        if missing_city not in new_cities:
+            idx = np.random.randint(len(child))
+            child[idx] = child[idx] + np.array(missing_city)
+
     return child
