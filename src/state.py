@@ -75,7 +75,7 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
         self._population = self._population
 
     def _validate_all_present(self, distribution):
-        cities = np.arange(1, self._num_cities + 1)
+        cities = np.arange(1, self._num_cities)
         for city in cities:
             is_present = 0
             for route in distribution:
@@ -86,16 +86,15 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
         return True
 
     def _generate_distibution(self):
-        cities = np.arange(1, self._num_cities + 1)
+        cities = np.arange(1, self._num_cities)
         np.random.shuffle(cities)
 
         distribution = [[] for _ in range(self._num_couriers)]
         courier_load = np.zeros(self._num_couriers)
         for city in cities:
-            city_id = city - 1
             for courier_id in range(self._num_couriers):
-                if courier_load[courier_id] + self._demand[city_id] <= self._capacity[courier_id]:
-                    courier_load[courier_id] += self._demand[city_id]
+                if courier_load[courier_id] + self._demand[city] <= self._capacity[courier_id]:
+                    courier_load[courier_id] += self._demand[city]
                     distribution[courier_id].append(city)
                     break
 
