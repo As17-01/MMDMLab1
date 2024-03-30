@@ -3,6 +3,23 @@ from typing import Sequence
 import numpy as np
 
 
+def reallocate_randomly(city: int, distribution, random_state: int):
+    distribution = distribution.copy()
+    np.random.seed(random_state)
+
+    num_couriers = len(distribution)
+
+    distribution = [path[path != city] for path in distribution]
+    
+    recipient_idx = np.random.randint(num_couriers)
+    recipient = distribution[recipient_idx]
+
+    place_idx = np.random.randint(len(recipient))
+
+    distribution[recipient_idx] = np.insert(distribution[recipient_idx], place_idx, city)
+    return distribution
+
+
 def square_mutation(coordinates: Sequence[float], delta: float, random_state: int) -> Sequence[float]:
     np.random.seed(random_state)
     new_coordinates = np.array(coordinates)
@@ -15,17 +32,12 @@ def square_mutation(coordinates: Sequence[float], delta: float, random_state: in
 
 def courier_mutation(distribution: Sequence[np.ndarray], delta: float, random_state: int):
     np.random.seed(random_state)
-    num_couriers = len(distribution)
 
     num_jumps = int(np.random.exponential(delta))
     all_cities = {x for l in distribution for x in l}
     
     for _ in range(num_jumps):
         city = np.random.choice(all_cities, 1, replace=False)
-        
-        new_distribution = [ar.pop(city) for ar in new_distribution if city in ar]
-        
-        recipient_idx = np.random.randint(num_couriers)
-        new_distribution[recipient_idx] = new_distribution[recipient_idx] + np.array(city)
+        new_distribution = reallocate_randomly(city, distribution, random_state)
 
     return new_distribution
