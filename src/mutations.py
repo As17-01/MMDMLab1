@@ -14,7 +14,10 @@ def reallocate_randomly(city: int, distribution, random_state: int):
     recipient_idx = np.random.randint(num_couriers)
     recipient = distribution[recipient_idx]
 
-    place_idx = np.random.randint(len(recipient))
+    if len(recipient) > 0:
+        place_idx = np.random.randint(len(recipient))
+    else:
+        place_idx = 0
 
     distribution[recipient_idx] = np.insert(distribution[recipient_idx], place_idx, city)
     return distribution
