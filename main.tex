@@ -1,0 +1,75 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{graphicx} % Required for inserting images
+
+\title{MMDM Lab №1}
+\author{Our names}
+
+\begin{document}
+
+\maketitle
+
+\section{Problem description}
+The aim of problem is to find a set of minimum total cost routes for a capacitated vehicles (couriers). Each courier starts and ends the route at the flower market and has to serve a set of cities with following constraints:
+\begin{enumerate}
+  \item Each city needs only certain number of flowers
+  \item Couriers are paid for the distance travelled 
+  \item The total demand of route does not exceed the capacity of the courier
+\end{enumerate}
+Let's try to formalize our problem. 
+\begin{itemize}
+  \item $N$ is the set of cities with $N = \{1,2,3,...,n\}$
+  \item $M$ is the set of courier with $M = \{1,2,3,...,m\}$
+  \item $q_v$ is the capacity of the courier $v$
+  \item $d_i$ is the demand if the city $i$
+  \item $c_{ij}$ is the distance between city $i$ and city $j$
+  \item $y_{iv}$ is the amount of cargo delivered to client $i$ by courier $v$  
+\end{itemize}
+
+Our goal is to minimize the total cost (distance):
+\begin{equation} \label{min}
+\underset{x}{\text{min}}  \sum_{i=1}^{n}\sum_{j=1}^{n}\sum_{v=1}^{m} c_{ij}x_{ijv}
+\end{equation}
+
+\begin{equation} \label{x}
+x_{ijv} \in \{0,1\}, 
+\end{equation}
+\begin{center}
+   1 - courier  $v$ visited city $i$, 0 - otherwise 
+\end{center}
+
+
+\begin{equation} \label{3rd}
+\sum_{i=1}^{n}\sum_{v=1}^{m} x_{ijv} = 1, \qquad \forall j \in \{1,2,...,n\}
+\end{equation}
+
+\begin{equation} \label{4th}
+\sum_{i=0}^{n} x_{izv} = \sum_{j=0}^{n} x_{zjv} , \qquad \forall z \in \{0,...,n\}, \forall v \in \{1,...,m\}
+\end{equation}
+
+\begin{equation} \label{5th}
+y_{iv} \leq d_i\sum_{j=1}^{n} x_{ijv}, \qquad \forall i \in \{1,...,n\}, \forall v \in \{1,...,m\}
+\end{equation}
+
+\begin{equation} \label{6th}
+\sum_{v=1}^{m} y_{iv} = d_i, \qquad \forall i \in \{1,...,n\}
+\end{equation}
+
+\begin{equation} \label{7th}
+\sum_{i=1}^{n} y_{iv} \leq q_v, \qquad \forall v \in \{1,...,n\}
+\end{equation}
+
+The function (\ref{min}) minimizes the total delivery cost (distance). The claim (\ref{3rd}) ensures that each city is visited by exactly one courier and the limitation (\ref{4th}) requires that every courier can leave the flower store only once, and the number of couriers visited every city and returning to the store is equal to the number of the couriers leaving. Constraints (\ref{5th}) and (\ref{6th}) guarantee that the amount of cargo delivered by couriers is equal to their demand. And the last requirment (\ref{7th}) ensures that the courier can carry only certain number of cargo (flowers).
+
+\section{Algorithm}
+\begin{enumerate}
+  \item First of all, we generate initial population $ P =  \{s_0,s_1,...,s_k\}$. Here we have $k$ solutions that includes set of the couriers with sequence of the cities they serve. 
+  \item Then we find the best solution $F^* = \underset{i}{\text{min}}f(s_i)$/. In our case $f$ is the cost (distance) function with all constraints mentioned above
+  \item Randomly chose 2 parents $s_1$ and $s_2$ from population and apply our crossover operator: $child = C(s_1,s_2)$
+  \item Then we apply mutation operator in order to expand the search area and preserve diversity in the population: $child' = M(child)$
+  \item If $f(child') < F^*$, we update $F^*$. 
+  \item Finally, we append $child$ to our population and remove the worst solution from it. 
+  \item We repeat step 3 to step 6 $t$ times to reach a sufficient number of iterations to find the best solution.
+\end{enumerate}
+
+\end{document}
