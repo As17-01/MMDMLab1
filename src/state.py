@@ -3,7 +3,7 @@ from typing import Tuple
 import numpy as np
 
 
-class GeneticAlgorithmState:
+class DotsGeneticAlgorithmState:
     def __init__(
         self,
         population_size: int,
@@ -28,9 +28,10 @@ class GeneticAlgorithmState:
     def population(self):
         return self._population
     
-class CourierPopulation:
+class CouriersGeneticAlgorithmState:
     def __init__(
-        self, num_couriers: int, 
+        self,
+        num_couriers: int, 
         num_points: int, 
         population_size: int,
         random_state: int = None

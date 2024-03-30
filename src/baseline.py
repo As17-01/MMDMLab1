@@ -3,7 +3,7 @@ from typing import Callable, Sequence
 import numpy as np
 
 from src.base import BaseGeneticAlgorithm
-from src.state import GeneticAlgorithmState
+from src.state import Any
 
 
 class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
@@ -11,7 +11,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
     def __init__(
         self,
-        state: GeneticAlgorithmState,
+        state: Any,
         eval_functions: Sequence[Callable],
         mutation_function: Callable,
         mating_function: Callable,
