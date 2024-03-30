@@ -47,7 +47,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
             new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
             new_population.append(self._state.population[new_pop_id])
-            eval_results[new_pop_id] = np.array([np.inf] * len(self._eval_functions))
+            eval_results[new_pop_id] = np.ones(len(self._eval_functions)) * 100000000
 
         self._state.population = new_population
 
@@ -82,4 +82,15 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
         min_ids = np.arange(len(scores))[np.array(scores) == 0]
         best_pops = [self._state.population[i] for i in min_ids]
-        return best_pops
+
+        best_pops_conv_list = []
+        for pop in best_pops:
+            pop_conv = [l.tolist() for l in pop]
+            best_pops_conv_list.append(pop_conv)
+
+        # In case of equality
+        best_pops_unique = []
+        for pop in best_pops_conv_list:
+            if pop not in best_pops_unique:
+                best_pops_unique.append(pop)
+        return best_pops_unique
