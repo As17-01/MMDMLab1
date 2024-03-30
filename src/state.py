@@ -1,7 +1,7 @@
-from typing import Tuple
+from typing import Tuple, List
 
 import numpy as np
-
+from loguru import logger
 
 from abc import ABC
 
@@ -37,42 +37,66 @@ class DotsGeneticAlgorithmState(BaseGeneticAlgorithmState):
 
         np.random.seed(random_state)
 
-        self._population = list(np.random.uniform(
+        self._population = np.random.uniform(
             low=constraints[0],
             high=constraints[1],
             size=(population_size, dimension_size),
-        ))
-
+        ).tolist()
 
 class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
     def __init__(
         self,
-        num_couriers: int, 
-        num_cities: int, 
+        capacity: List[int],
+        demand: List[int],
         population_size: int,
         random_state: int,
         
     ):
         self._population_size = population_size
-        self._num_couriers = num_couriers
-        self._num_cities = num_cities
+        self._num_couriers = len(capacity)
+        self._capacity = capacity
+        self._num_cities = len(demand)
+        self._demand = demand
         self._random_state = random_state
 
         np.random.seed(random_state)
 
-        if self._num_cities < self._num_couriers:
-            raise ValueError("Количество пунктов должно быть не меньше количества курьеров.")
-
         self._population = []
-        for _ in range(self._population_size):
-            self._population.append(self._generate_distibution())
+        average_num_retries = 0
+        while len(self._population) < self._population_size:
 
+            new_pop = self._generate_distibution()
+            while not self._validate_all_present(new_pop):
+                average_num_retries += 1 / self._population_size
+                new_pop = self._generate_distibution()
+
+            self._population.append(new_pop)
+        logger.info(f"Average Num retries: {average_num_retries}")
         self._population = self._population
+
+    def _validate_all_present(self, distribution):
+        cities = np.arange(1, self._num_cities + 1)
+        for city in cities:
+            is_present = 0
+            for route in distribution:
+                if city in route:
+                    is_present += 1
+            if is_present == 0:
+                return False
+        return True
 
     def _generate_distibution(self):
         cities = np.arange(1, self._num_cities + 1)
         np.random.shuffle(cities)
 
-        div = np.sort(np.random.choice(np.arange(self._num_cities), self._num_couriers - 1, replace=False))
-        distribution = np.split(cities, div)
+        distribution = [[] for _ in range(self._num_couriers)]
+        courier_load = np.zeros(self._num_couriers)
+        for city in cities:
+            city_id = city - 1
+            for courier_id in range(self._num_couriers):
+                if courier_load[courier_id] + self._demand[city_id] <= self._capacity[courier_id]:
+                    courier_load[courier_id] += self._demand[city_id]
+                    distribution[courier_id].append(city)
+                    break
+
         return distribution
