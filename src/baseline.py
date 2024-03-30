@@ -27,7 +27,10 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         # Note that this might break constraints for dots
         new_pops = []
         for i, pop in enumerate(self._state.population):
-            new_pops.append(self._mutation_function(pop, delta=delta, random_state=self._random_state * 6 + i))
+            if i < self._state.population_size / 2:
+                new_pops.append(self._mutation_function(pop, delta=delta, random_state=self._random_state * 6 + i))
+            else:
+                new_pops.append(pop)
         self._state.population = new_pops
 
     def select(self, keep_share: float) -> None:
