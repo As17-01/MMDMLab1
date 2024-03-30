@@ -3,6 +3,7 @@ from typing import Optional, Sequence, List
 
 import numpy as np
 
+from src.mutations import reallocate_randomly
 
 def mean_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
     np.random.seed(random_state)
@@ -22,15 +23,14 @@ def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state
     exhanged_cities = set(*parent2[cross_courier_idx])
 
     # Remove cities from array, which are exchanged
-    for exch_city in exhanged_cities:
-        child = [ar.pop(exch_city) for ar in child if exch_city in ar]
+    for city in exhanged_cities:
+        child = [path[path != city] for path in child]
     child[cross_courier_idx] = parent2[cross_courier_idx]
 
     # If a city is missing, add it to a random courier
     new_cities = {x for l in child for x in l}
     for missing_city in all_cities:
         if missing_city not in new_cities:
-            idx = np.random.randint(len(child))
-            child[idx] = child[idx] + np.array(missing_city)
+            child = reallocate_randomly(missing_city, child, random_state)
 
     return child
