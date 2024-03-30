@@ -36,8 +36,8 @@ def courier_mutation(distribution: Sequence[np.ndarray], delta: float, random_st
     num_jumps = int(np.random.exponential(delta))
     all_cities = {x for l in distribution for x in l}
     
-    for _ in range(num_jumps):
-        city = np.random.choice(all_cities, 1, replace=False)
-        new_distribution = reallocate_randomly(city, distribution, random_state)
-
-    return new_distribution
+    for i in range(num_jumps):
+        city = np.random.choice(np.array(list(all_cities)), 1, replace=False)
+        distribution = reallocate_randomly(city, distribution, random_state + 100 * i)
+        
+    return distribution
