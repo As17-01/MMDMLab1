@@ -83,14 +83,9 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         min_ids = np.arange(len(scores))[np.array(scores) == 0]
         best_pops = [self._state.population[i] for i in min_ids]
 
-        best_pops_conv_list = []
-        for pop in best_pops:
-            pop_conv = [l.tolist() for l in pop]
-            best_pops_conv_list.append(pop_conv)
-
         # In case of equality
         best_pops_unique = []
-        for pop in best_pops_conv_list:
+        for pop in best_pops:
             if pop not in best_pops_unique:
                 best_pops_unique.append(pop)
         return best_pops_unique
