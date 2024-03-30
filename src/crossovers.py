@@ -2,6 +2,7 @@
 from typing import Optional, Sequence, List
 
 import numpy as np
+import copy
 
 from src.mutations import reallocate_randomly
 
@@ -16,7 +17,7 @@ def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state
     parent1_idx, parent2_idx = np.random.choice(len(parents), 2, replace=False)
     parent1, parent2 = parents[parent1_idx], parents[parent2_idx]
 
-    child = parent1.copy()
+    child = copy.deepcopy(parent1)
     cross_courier_idx = np.random.randint(len(parent1))
 
     all_cities = {x for l in child for x in l}
@@ -24,7 +25,7 @@ def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state
 
     # Remove cities from array, which are exchanged
     for city in exchanged_cities:
-        child = [path[path != city] for path in child]
+        _ = [path.remove(city) for path in child if city in path]
     child[cross_courier_idx] = parent2[cross_courier_idx]
 
     # If a city is missing, add it to a random courier

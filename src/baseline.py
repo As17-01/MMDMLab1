@@ -1,6 +1,7 @@
 from typing import Callable, Sequence
 
 import numpy as np
+import copy
 
 from src.base import BaseGeneticAlgorithm
 from src.state import BaseGeneticAlgorithmState
@@ -59,7 +60,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         init_size = len(self._state.population)
         pop_size = self._state.population_size
 
-        new_pops = self._state.population.copy()
+        new_pops = copy.deepcopy(self._state.population)
         for i in range(pop_size - init_size):
             np.random.seed(8 * self._random_state + i * 4)
             candidate_ids = np.random.choice(np.arange(init_size), 2, replace=False)
