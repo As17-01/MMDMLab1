@@ -1,7 +1,8 @@
-from typing import Callable, Sequence
+import copy
+from typing import Callable
+from typing import Sequence
 
 import numpy as np
-import copy
 
 from src.base import BaseGeneticAlgorithm
 from src.state import BaseGeneticAlgorithmState

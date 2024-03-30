@@ -1,9 +1,9 @@
-from typing import Tuple, List
+from abc import ABC
+from typing import List
+from typing import Tuple
 
 import numpy as np
 from loguru import logger
-
-from abc import ABC
 
 
 class BaseGeneticAlgorithmState(ABC):
@@ -12,7 +12,7 @@ class BaseGeneticAlgorithmState(ABC):
     @property
     def population(self):
         return self._population
-    
+
     @population.setter
     def population(self, new_population):
         self._population = new_population
@@ -43,6 +43,7 @@ class DotsGeneticAlgorithmState(BaseGeneticAlgorithmState):
             size=(population_size, dimension_size),
         ).tolist()
 
+
 class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
     def __init__(
         self,
@@ -50,7 +51,6 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
         demand: List[int],
         population_size: int,
         random_state: int,
-        
     ):
         self._population_size = population_size
         self._num_couriers = len(capacity)

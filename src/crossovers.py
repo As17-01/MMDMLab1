@@ -1,10 +1,12 @@
-
-from typing import Optional, Sequence, List
+import copy
+from typing import List
+from typing import Optional
+from typing import Sequence
 
 import numpy as np
-import copy
 
 from src.mutations import reallocate_randomly
+
 
 def mean_crossover(parents: Sequence[List[List[float]]], random_state: Optional[int] = None):
     np.random.seed(random_state)
@@ -13,7 +15,7 @@ def mean_crossover(parents: Sequence[List[List[float]]], random_state: Optional[
 
 def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
     np.random.seed(random_state)
-    
+
     parent1_idx, parent2_idx = np.random.choice(len(parents), 2, replace=False)
     parent1, parent2 = parents[parent1_idx], parents[parent2_idx]
 
