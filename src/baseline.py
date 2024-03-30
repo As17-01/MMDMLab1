@@ -24,57 +24,53 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         self._random_state = random_state
 
     def mutate(self, delta: float) -> None:
-        # Note that this might break constraints
-        # TODO: keep some of the best iterations
+        # Note that this might break constraints for dots
         new_pops = []
-        for pop in self._state._population:
-            new_pops.append(self._mutation_function(pop, delta=delta))
-        self._state._population = np.array(new_pops)
+        for pop in self._state.population:
+            new_pops.append(self._mutation_function(pop, delta=delta, random_state=self._random_state))
+        self._state.population = new_pops
 
     def select(self, keep_share: float) -> None:
-        num_to_keep = int(self._state._population_size * keep_share)
-        np.random.seed(self._random_state + int(np.max(self._state._population) - np.min(self._state._population) * 21))
+        num_to_keep = int(self._state.population_size * keep_share)
 
         # Note that this minimizes the scores
         eval_results = []
-        for pop in self._state._population:
+        for pop in self._state.population:
             pop_eval_result = [f(pop) for f in self._eval_functions]
             eval_results.append(pop_eval_result)
         eval_results = np.array(eval_results)
 
         new_population = []
-        while len(new_population) < num_to_keep:
+        for i in range(num_to_keep):
+            np.random.seed(21 * self._random_state + i)
             weights = np.random.uniform(0, 1, size=len(self._eval_functions))
 
-            # TODO: Delete andom comment
             new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
-            new_population.append(self._state._population[new_pop_id])
+            new_population.append(self._state.population[new_pop_id])
             eval_results[new_pop_id] = np.array([np.inf] * len(self._eval_functions))
 
-        self._state._population = np.array(new_population)
+        self._state.population = new_population
 
     def mate(self) -> None:
         # Keep the best iterations then add mated ones
-        init_size = len(self._state._population)
-        pop_size = self._state._population_size
-        new_pops = []
-        while len(new_pops) < pop_size - init_size:
-            ids = np.arange(init_size)
-            candidate_ids = np.random.choice(ids, 2, replace=False)
+        init_size = len(self._state.population)
+        pop_size = self._state.population_size
 
-            candidate0 = self._state._population[candidate_ids[0]]
-            candidate1 = self._state._population[candidate_ids[1]]
+        new_pops = self._state.population.copy()
+        for i in range(pop_size - init_size):
+            np.random.seed(8 * self._random_state + i * 4)
+            candidate_ids = np.random.choice(np.arange(init_size), 2, replace=False)
 
-            new_pops.append(self._mating_function([candidate0, candidate1], axis=0))
+            candidate0 = self._state.population[candidate_ids[0]]
+            candidate1 = self._state.population[candidate_ids[1]]
 
-        new_pops_array = np.array(new_pops)
-        self._state._population = np.append(
-            self._state._population, new_pops_array, axis=0
-        )
+            new_pops.append(self._mating_function([candidate0, candidate1], random_state=self._random_state + i * 9))
+
+        self._state.population = new_pops
 
     def get_best(self) -> Sequence[Sequence[float]]:
         eval_results = []
-        for pop in self._state._population:
+        for pop in self._state.population:
             pop_eval_result = [f(pop) for f in self._eval_functions]
             eval_results.append(pop_eval_result)
         eval_results = np.array(eval_results)
@@ -84,6 +80,6 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             ordering_score = np.sum(np.all(eval_results < pop_eval, axis=1))
             scores.append(ordering_score)
 
-        min_ids = np.array(scores) == 0
-        best_pops = self._state._population[min_ids]
+        min_ids = np.arange(len(scores))[np.array(scores) == 0]
+        best_pops = [self._state.population[i] for i in min_ids]
         return best_pops
