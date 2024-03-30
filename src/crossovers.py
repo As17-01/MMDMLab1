@@ -20,10 +20,10 @@ def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state
     cross_courier_idx = np.random.randint(len(parent1))
 
     all_cities = {x for l in child for x in l}
-    exhanged_cities = set(*parent2[cross_courier_idx])
+    exchanged_cities = set(list(parent2[cross_courier_idx]))
 
     # Remove cities from array, which are exchanged
-    for city in exhanged_cities:
+    for city in exchanged_cities:
         child = [path[path != city] for path in child]
     child[cross_courier_idx] = parent2[cross_courier_idx]
 
