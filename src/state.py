@@ -70,7 +70,10 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
                 average_num_retries += 1 / self._population_size
                 new_pop = self._generate_distibution()
 
+            if new_pop in self._population:
+                continue
             self._population.append(new_pop)
+
         logger.info(f"Average Num retries: {average_num_retries}")
         self._population = self._population
 
@@ -83,6 +86,13 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
                     is_present += 1
             if is_present == 0:
                 return False
+        return True
+    
+    def _validate_capacity(self, distribution: List[List[int]]):
+        for courier_id, courier_route in enumerate(distribution):
+            if len(courier_route) > 0:
+                if np.sum(np.array(self._demand)[np.array(courier_route)]) > self._capacity[courier_id]:
+                    return False
         return True
 
     def _generate_distibution(self):
@@ -97,5 +107,8 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
                     courier_load[courier_id] += self._demand[city]
                     distribution[courier_id].append(city)
                     break
+
+        if not self._validate_capacity(distribution):
+            raise ValueError("Generated an invalid distribution!")
 
         return distribution
