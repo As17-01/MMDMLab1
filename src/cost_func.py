@@ -5,17 +5,9 @@ import numpy as np
 
 
 class DistanceCost:
-    def __init__(self, salary, dist_matrix, demand, capacity):
+    def __init__(self, salary, dist_matrix):
         self._salary = np.array(salary)
         self._dist_matrix = np.array(dist_matrix)
-        self._demand = demand
-        self._capacity = capacity
-
-    def _validate_capacity(self, courier_id: int, courier_route: List[int]):
-        if len(courier_route) > 0:
-            if np.sum(np.array(self._demand)[np.array(courier_route)]) > self._capacity[courier_id]:
-                return False
-        return True
 
     def __call__(self, route: List[List[int]]) -> float:
         """
@@ -24,10 +16,6 @@ class DistanceCost:
         матрицу дистанции между городами
         """
         full_route = copy.deepcopy(route)
-
-        for i, courier_route in enumerate(full_route):
-            if not self._validate_capacity(i, courier_route):
-                return 100000000
 
         # Добавляем 0 в начало и конец пути каждого курьера, тк они стартуют и возвращаются в депот
         for i in full_route:
