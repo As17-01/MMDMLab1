@@ -6,6 +6,7 @@ import numpy as np
 
 from src.base import BaseGeneticAlgorithm
 from src.state import BaseGeneticAlgorithmState
+from src.state import CouriersGeneticAlgorithmState
 
 
 class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
@@ -32,15 +33,20 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             if i < self._state.population_size / 2:
                 distribution = self._mutation_function(pop, delta=delta, random_state=self._random_state * 6 + i)
 
-                retry_factor = 1
-                while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
-                    distribution = self._mutation_function(pop, delta=delta, random_state=self._random_state * 6 + i + 100 * retry_factor)
-                    retry_factor += 1
+                if isinstance(self._state, CouriersGeneticAlgorithmState):
+                    retry_factor = 1
+                    while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
+                        distribution = self._mutation_function(
+                            pop, delta=delta, random_state=self._random_state * 6 + i + 100 * retry_factor
+                        )
+                        retry_factor += 1
 
-                if (retry_factor < 100) and (distribution not in new_pops):
-                    new_pops.append(distribution)
+                    if (retry_factor < 100) and (distribution not in new_pops):
+                        new_pops.append(distribution)
+                    else:
+                        new_pops.append(pop)
                 else:
-                    new_pops.append(pop)
+                    new_pops.append(distribution)
 
             else:
                 new_pops.append(pop)
@@ -88,12 +94,17 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
             distribution = self._mating_function([candidate0, candidate1], random_state=self._random_state + i * 9)
 
-            retry_factor = 1
-            while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
-                distribution = self._mating_function([candidate0, candidate1], random_state=self._random_state + i * 9 + 77 * retry_factor)
-                retry_factor += 1
+            if isinstance(self._state, CouriersGeneticAlgorithmState):
+                retry_factor = 1
+                while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
+                    distribution = self._mating_function(
+                        [candidate0, candidate1], random_state=self._random_state + i * 9 + 77 * retry_factor
+                    )
+                    retry_factor += 1
 
-            if (retry_factor < 100) and (distribution not in new_pops):
+                if (retry_factor < 100) and (distribution not in new_pops):
+                    new_pops.append(distribution)
+            else:
                 new_pops.append(distribution)
 
         self._state.population = new_pops

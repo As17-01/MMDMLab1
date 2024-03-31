@@ -87,7 +87,7 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
             if is_present == 0:
                 return False
         return True
-    
+
     def _validate_capacity(self, distribution: List[List[int]]):
         for courier_id, courier_route in enumerate(distribution):
             if len(courier_route) > 0:
