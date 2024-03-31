@@ -89,9 +89,6 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             candidate0 = self._state.population[candidate_ids[0]]
             candidate1 = self._state.population[candidate_ids[1]]
 
-            if candidate0 == candidate1:
-                continue
-
             distribution = self._mating_function([candidate0, candidate1], random_state=self._random_state + i * 9)
 
             if isinstance(self._state, CouriersGeneticAlgorithmState):
