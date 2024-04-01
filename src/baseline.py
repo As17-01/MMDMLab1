@@ -84,7 +84,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             if isinstance(self._state, CouriersGeneticAlgorithmState):
                 eq_classes = create_eq_classes(self._state._demand)
                 distribution = self._mating_function([candidate0, candidate1], eq_classes=eq_classes)
-                
+
                 num_retries = 1
                 while (not self._state._validate_capacity(distribution)) and (num_retries < 200):
                     distribution = self._mating_function([candidate0, candidate1], eq_classes=eq_classes)
@@ -121,5 +121,5 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
                     best_pops_unique.append(pop)
             else:
                 if np.round(pop, 8).tolist() not in np.round(best_pops_unique, 8).tolist():
-                    best_pops_unique.append(pop)      
+                    best_pops_unique.append(pop)
         return best_pops_unique
