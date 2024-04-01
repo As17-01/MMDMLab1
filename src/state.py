@@ -65,10 +65,10 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
         average_num_retries = 0
         while len(self._population) < self._population_size:
 
-            new_pop = self._generate_distibution()
+            new_pop = self._generate_distribution()
             while not self._validate_all_present(new_pop):
                 average_num_retries += 1 / self._population_size
-                new_pop = self._generate_distibution()
+                new_pop = self._generate_distribution()
 
             if new_pop in self._population:
                 continue
@@ -77,7 +77,7 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
         logger.info(f"Average Num retries: {average_num_retries}")
         self._population = self._population
 
-    def _validate_all_present(self, distribution):
+    def _validate_all_present(self, distribution: List[List[int]]) -> bool:
         cities = np.arange(1, self._num_cities)
         for city in cities:
             is_present = 0
@@ -88,14 +88,14 @@ class CouriersGeneticAlgorithmState(BaseGeneticAlgorithmState):
                 return False
         return True
 
-    def _validate_capacity(self, distribution: List[List[int]]):
+    def _validate_capacity(self, distribution: List[List[int]]) -> bool:
         for courier_id, courier_route in enumerate(distribution):
             if len(courier_route) > 0:
                 if np.sum(np.array(self._demand)[np.array(courier_route)]) > self._capacity[courier_id]:
                     return False
         return True
 
-    def _generate_distibution(self):
+    def _generate_distribution(self) -> List[List[int]]:
         cities = np.arange(1, self._num_cities)
         np.random.shuffle(cities)
 

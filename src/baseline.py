@@ -7,6 +7,7 @@ import numpy as np
 from src.base import BaseGeneticAlgorithm
 from src.state import BaseGeneticAlgorithmState
 from src.state import CouriersGeneticAlgorithmState
+from src.utils import create_eq_classes
 
 
 class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
@@ -18,41 +19,37 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         eval_functions: Sequence[Callable],
         mutation_function: Callable,
         mating_function: Callable,
-        random_state: int = 99,
     ):
         self._state = state
         self._eval_functions = eval_functions
         self._mutation_function = mutation_function
         self._mating_function = mating_function
-        self._random_state = random_state
 
-    def mutate(self, delta: float) -> None:
+    def mutate(self, delta: float, random_state: int) -> None:
+        np.random.seed(random_state)
+
         # Note that this might break constraints for dots
         new_pops = []
-        for i, pop in enumerate(self._state.population):
-            if i < self._state.population_size / 2:
-                distribution = self._mutation_function(pop, delta=delta, random_state=self._random_state * 6 + i)
-
+        for pop in self._state.population:
+            mutate = np.random.uniform(0, 1)
+            if mutate <= 0.5:
                 if isinstance(self._state, CouriersGeneticAlgorithmState):
-                    retry_factor = 1
-                    while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
-                        distribution = self._mutation_function(
-                            pop, delta=delta, random_state=self._random_state * 6 + i + 100 * retry_factor
-                        )
-                        retry_factor += 1
-
-                    if (retry_factor < 100) and (distribution not in new_pops):
-                        new_pops.append(distribution)
-                    else:
-                        new_pops.append(pop)
+                    eq_classes = create_eq_classes(self._state._demand)
+                    distribution = self._mutation_function(pop, delta=delta, eq_classes=eq_classes)
                 else:
-                    new_pops.append(distribution)
+                    distribution = self._mutation_function(pop, delta=delta)
 
+                if distribution not in new_pops:
+                    new_pops.append(distribution)
+                else:
+                    new_pops.append(pop)
             else:
                 new_pops.append(pop)
         self._state.population = new_pops
 
-    def select(self, keep_share: float) -> None:
+    def select(self, keep_share: float, random_state: int) -> None:
+        np.random.seed(random_state)
+
         num_to_keep = int(self._state.population_size * keep_share)
 
         # Note that this minimizes the scores
@@ -64,7 +61,6 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
         new_population = []
         for i in range(num_to_keep):
-            np.random.seed(21 * self._random_state + i)
             weights = np.random.uniform(0, 1, size=len(self._eval_functions))
 
             new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
@@ -73,37 +69,37 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
         self._state.population = new_population
 
-    def mate(self) -> None:
+    def mate(self, random_state: int) -> None:
+        np.random.seed(random_state)
+
         # Keep the best iterations then add mated ones
         init_size = len(self._state.population)
         pop_size = self._state.population_size
 
-        new_pops = copy.deepcopy(self._state.population)
         i = 0
+        new_pops = copy.deepcopy(self._state.population)
         while len(new_pops) < pop_size:
-            i += 1
-
-            np.random.seed(8 * self._random_state + i * 4)
             candidate_ids = np.random.choice(np.arange(init_size), 2, replace=False)
 
             candidate0 = self._state.population[candidate_ids[0]]
             candidate1 = self._state.population[candidate_ids[1]]
 
-            distribution = self._mating_function([candidate0, candidate1], random_state=self._random_state + i * 9)
-
             if isinstance(self._state, CouriersGeneticAlgorithmState):
-                retry_factor = 1
-                while (not self._state._validate_capacity(distribution)) and (retry_factor < 100):
-                    distribution = self._mating_function(
-                        [candidate0, candidate1], random_state=self._random_state + i * 9 + 77 * retry_factor
-                    )
-                    retry_factor += 1
+                eq_classes = create_eq_classes(self._state._demand)
+                distribution = self._mating_function([candidate0, candidate1], eq_classes=eq_classes)
+                
+                num_retries = 1
+                while (not self._state._validate_capacity(distribution)) and (num_retries < 200):
+                    distribution = self._mating_function([candidate0, candidate1], eq_classes=eq_classes)
+                    num_retries += 1
 
-                if (retry_factor < 100) and (distribution not in new_pops):
+                if (num_retries < 200) and (distribution not in new_pops):
                     new_pops.append(distribution)
             else:
+                distribution = self._mating_function([candidate0, candidate1])
                 new_pops.append(distribution)
 
+            i += 1
         self._state.population = new_pops
 
     def get_best(self) -> Sequence[Sequence[float]]:
