@@ -1,6 +1,5 @@
 from abc import ABC
 from abc import abstractmethod
-from typing import Sequence
 
 
 class BaseGeneticAlgorithm(ABC):
@@ -19,5 +18,5 @@ class BaseGeneticAlgorithm(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_best(self) -> Sequence[float]:
+    def get_best(self):
         raise NotImplementedError

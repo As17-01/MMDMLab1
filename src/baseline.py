@@ -1,6 +1,6 @@
 import copy
 from typing import Callable
-from typing import Sequence
+from typing import List
 
 import numpy as np
 
@@ -16,18 +16,19 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
     def __init__(
         self,
         state: BaseGeneticAlgorithmState,
-        eval_functions: Sequence[Callable],
+        eval_functions: List[Callable],
         mutation_function: Callable,
         mating_function: Callable,
+        random_state: int = 99,
     ):
         self._state = state
         self._eval_functions = eval_functions
         self._mutation_function = mutation_function
         self._mating_function = mating_function
 
-    def mutate(self, delta: float, random_state: int) -> None:
         np.random.seed(random_state)
 
+    def mutate(self, delta: float) -> None:
         # Note that this might break constraints for dots
         new_pops = []
         for pop in self._state.population:
@@ -47,9 +48,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
                 new_pops.append(pop)
         self._state.population = new_pops
 
-    def select(self, keep_share: float, random_state: int) -> None:
-        np.random.seed(random_state)
-
+    def select(self, keep_share: float) -> None:
         num_to_keep = int(self._state.population_size * keep_share)
 
         # Note that this minimizes the scores
@@ -69,8 +68,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
 
         self._state.population = new_population
 
-    def mate(self, random_state: int) -> None:
-        np.random.seed(random_state)
+    def mate(self) -> None:
 
         # Keep the best iterations then add mated ones
         init_size = len(self._state.population)
@@ -102,7 +100,7 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
             i += 1
         self._state.population = new_pops
 
-    def get_best(self) -> Sequence[Sequence[float]]:
+    def get_best(self) -> List[List[float]]:
         eval_results = []
         for pop in self._state.population:
             pop_eval_result = [f(pop) for f in self._eval_functions]
