@@ -1,20 +1,32 @@
 import copy
 from typing import List
-from typing import Optional
-from typing import Sequence
 
 import numpy as np
 
-from src.mutations import reallocate_randomly
 
-
-def mean_crossover(parents: Sequence[List[List[float]]], random_state: Optional[int] = None):
-    np.random.seed(random_state)
+def mean_crossover(parents: List[List[float]]):
     return np.mean(parents, axis=0).tolist()
 
 
-def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state: Optional[int] = None):
-    np.random.seed(random_state)
+def reallocate_randomly(city: int, distribution: List[List[int]]) -> List[List[int]]:
+    distribution = copy.deepcopy(distribution)
+
+    num_couriers = len(distribution)
+    _ = [path.remove(city) for path in distribution if city in path]
+
+    recipient_idx = np.random.randint(num_couriers)
+    recipient = distribution[recipient_idx]
+
+    if len(recipient) > 0:
+        place_idx = np.random.randint(len(recipient))
+    else:
+        place_idx = 0
+
+    distribution[recipient_idx].insert(place_idx, city)
+    return distribution
+
+
+def courier_2_parents_crossover(parents: List[List[List[int]]], eq_classes) -> List[List[int]]:
 
     parent1_idx, parent2_idx = np.random.choice(len(parents), 2, replace=False)
     parent1, parent2 = parents[parent1_idx], parents[parent2_idx]
@@ -34,6 +46,6 @@ def courier_2_parents_crossover(parents: Sequence[List[List[int]]], random_state
     new_cities = {x for l in child for x in l}
     for missing_city in all_cities:
         if missing_city not in new_cities:
-            child = reallocate_randomly(missing_city, child, random_state)
+            child = reallocate_randomly(missing_city, child)
 
     return child
