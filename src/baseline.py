@@ -74,7 +74,6 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         init_size = len(self._state.population)
         pop_size = self._state.population_size
 
-        i = 0
         new_pops = copy.deepcopy(self._state.population)
         while len(new_pops) < pop_size:
             candidate_ids = np.random.choice(np.arange(init_size), 2, replace=False)
@@ -97,7 +96,6 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
                 distribution = self._mating_function([candidate0, candidate1])
                 new_pops.append(distribution)
 
-            i += 1
         self._state.population = new_pops
 
     def get_best(self) -> List[List[float]]:
@@ -118,6 +116,10 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         # In case of equality
         best_pops_unique = []
         for pop in best_pops:
-            if pop not in best_pops_unique:
-                best_pops_unique.append(pop)
+            if isinstance(self._state, CouriersGeneticAlgorithmState):
+                if pop not in best_pops_unique:
+                    best_pops_unique.append(pop)
+            else:
+                if np.round(pop, 8).tolist() not in np.round(best_pops_unique, 8).tolist():
+                    best_pops_unique.append(pop)      
         return best_pops_unique
