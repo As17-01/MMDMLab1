@@ -32,8 +32,8 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         # Note that this might break constraints for dots
         new_pops = []
         for pop in self._state.population:
-            mutate = np.random.uniform(0, 1)
-            if mutate <= 0.5:
+            mutate_prob = np.random.uniform(0, 1)
+            if mutate_prob <= 0.5:
                 if isinstance(self._state, CouriersGeneticAlgorithmState):
                     eq_classes = create_eq_classes(self._state._demand)
                     distribution = self._mutation_function(pop, delta=delta, eq_classes=eq_classes)
