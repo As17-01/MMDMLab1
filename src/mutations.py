@@ -10,8 +10,6 @@ def square_mutation(coordinates: List[float], delta: float) -> List[float]:
     new_coordinates = np.array(coordinates)
 
     distance = np.random.uniform(low=-delta, high=delta, size=len(coordinates))
-    while np.all(np.abs(distance) < 0.0001):
-        distance = np.random.uniform(low=-delta, high=delta, size=len(coordinates))
     new_coordinates = new_coordinates + distance
 
     return new_coordinates.tolist()
