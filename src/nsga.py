@@ -12,6 +12,44 @@ from src.utils import create_eq_classes
 
 class NSGeneticAlgorithm(BaselineGeneticAlgorithm):
 
+    def __init__(
+        self,
+        state: BaseGeneticAlgorithmState,
+        eval_functions: List[Callable],
+        mutation_function: Callable,
+        mating_function: Callable,
+        random_state: int = 99,
+    ):
+        self._state = state
+        self._eval_functions = eval_functions
+        self._mutation_function = mutation_function
+        self._mating_function = mating_function
+
+        np.random.seed(random_state)
+
+    def get_best(self) -> List[List[float]]:
+        eval_results = []
+        for pop in self._state.population:
+            pop_eval_result = [f(pop) for f in self._eval_functions]
+            eval_results.append(pop_eval_result)
+        eval_results = np.array(eval_results)
+
+        scores = []
+        for pop_eval in eval_results:
+            ordering_score = np.sum(np.all(eval_results < pop_eval, axis=1))
+            scores.append(ordering_score)
+
+        min_ids = np.arange(len(scores))[np.array(scores) == 0]
+        best_pops = [self._state.population[i] for i in min_ids]
+
+        # In case of equality
+        best_pops_unique = []
+        for pop in best_pops:
+            if np.round(pop, 8).tolist() not in np.round(best_pops_unique, 8).tolist():
+                best_pops_unique.append(pop)
+        return best_pops_unique
+
+
     def select(self, keep_share):
         fronts = self.fast_non_dominated_sort()
         
