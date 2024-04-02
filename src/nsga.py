@@ -10,7 +10,7 @@ from src.state import BaseGeneticAlgorithmState
 from src.utils import create_eq_classes
 
 
-class NSGAGeneticAlgorithm(BaselineGeneticAlgorithm):
+class NSGeneticAlgorithm(BaselineGeneticAlgorithm):
 
     def select(self, keep_share):
         fronts = self.fast_non_dominated_sort()
