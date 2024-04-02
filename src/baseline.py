@@ -16,13 +16,13 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
     def __init__(
         self,
         state: BaseGeneticAlgorithmState,
-        eval_functions: List[Callable],
+        eval_function: Callable,
         mutation_function: Callable,
         mating_function: Callable,
         random_state: int = 99,
     ):
         self._state = state
-        self._eval_functions = eval_functions
+        self._eval_function = eval_function
         self._mutation_function = mutation_function
         self._mating_function = mating_function
 
@@ -54,17 +54,14 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
         # Note that this minimizes the scores
         eval_results = []
         for pop in self._state.population:
-            pop_eval_result = [f(pop) for f in self._eval_functions]
+            pop_eval_result = self._eval_function(pop)
             eval_results.append(pop_eval_result)
-        eval_results = np.array(eval_results)
 
         new_population = []
-        for i in range(num_to_keep):
-            weights = np.random.uniform(0, 1, size=len(self._eval_functions))
-
-            new_pop_id = np.argmin(np.sum(eval_results * weights, axis=1))
+        for _ in range(num_to_keep):
+            new_pop_id = np.argmin(eval_results)
             new_population.append(self._state.population[new_pop_id])
-            eval_results[new_pop_id] = np.ones(len(self._eval_functions)) * 100000000
+            eval_results[new_pop_id] = 100000000
 
         self._state.population = new_population
 
@@ -101,25 +98,8 @@ class BaselineGeneticAlgorithm(BaseGeneticAlgorithm):
     def get_best(self) -> List[List[float]]:
         eval_results = []
         for pop in self._state.population:
-            pop_eval_result = [f(pop) for f in self._eval_functions]
+            pop_eval_result = self._eval_function(pop)
             eval_results.append(pop_eval_result)
-        eval_results = np.array(eval_results)
 
-        scores = []
-        for pop_eval in eval_results:
-            ordering_score = np.sum(np.all(eval_results < pop_eval, axis=1))
-            scores.append(ordering_score)
-
-        min_ids = np.arange(len(scores))[np.array(scores) == 0]
-        best_pops = [self._state.population[i] for i in min_ids]
-
-        # In case of equality
-        best_pops_unique = []
-        for pop in best_pops:
-            if isinstance(self._state, CouriersGeneticAlgorithmState):
-                if pop not in best_pops_unique:
-                    best_pops_unique.append(pop)
-            else:
-                if np.round(pop, 8).tolist() not in np.round(best_pops_unique, 8).tolist():
-                    best_pops_unique.append(pop)
-        return best_pops_unique
+        best_pop_id = np.argmin(eval_results)
+        return self._state.population[best_pop_id]
