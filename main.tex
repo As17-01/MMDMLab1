@@ -3,14 +3,30 @@
 \usepackage{graphicx} % Required for inserting images
 
 \title{MMDM Lab №1}
-\author{Our names}
+\author {Mugaddam N, Seliverstov A, Ketsba A}
 
 \begin{document}
 
 \maketitle
 
-\section{Problem description}
-The aim of problem is to find a set of minimum total cost routes for a capacitated vehicles (couriers). Each courier starts and ends the route at the flower market and has to serve a set of cities with following constraints:
+\section{Problems 1-2 }
+The main steps of algorithm for solving problems 1-2 are as follows.
+
+\\First of all, we generate set $N$ with $n$ points, with $(x,y) \in [-10,10]^2$. Then we start to iterate $t$ times with next steps.
+\begin{enumerate}
+\item Select $m < n$ solutions with the best score from our population $N$ and add them to $ M =  \{a_1,a_2,...,a_m\}$. In Problem 2 this step is modified with NSGA-II algorithm adding non-dominated sorting and crowding distance sorting. 
+\item Generate new points by mating two random points and taking their mean  $a' = \big( {(x_1 + x_2)}/2 , {(y_1 + y_2)}/2 \big)$ for $R^2$
+\item Apply mutate operator by adding a small number $s$ to $a'$, while $s$ decreases as the number of iterations increases:
+    \begin{equation*} 
+    a'' = a' + s, \qquad \lim_{t \to \inf} s = 0
+    \end{equation*}
+Finally, after all iterations we take points with the best scores.
+\end{enumerate}
+
+\section{Problem 3}
+\subsection{Problem description}
+
+The aim of the problem is to find a set of minimum total cost routes for a capacitated vehicles (couriers). Each courier starts and ends the route at the flower market and has to serve a set of cities with following constraints:
 \begin{enumerate}
   \item Each city needs only certain number of flowers
   \item Couriers are paid for the distance travelled 
@@ -21,7 +37,7 @@ Let's try to formalize our problem.
   \item $N$ is the set of cities with $N = \{1,2,3,...,n\}$
   \item $M$ is the set of courier with $M = \{1,2,3,...,m\}$
   \item $q_v$ is the capacity of the courier $v$
-  \item $d_i$ is the demand if the city $i$
+  \item $d_i$ is the demand of the city $i$
   \item $c_{ij}$ is the distance between city $i$ and city $j$
   \item $y_{iv}$ is the amount of cargo delivered to client $i$ by courier $v$  
 \end{itemize}
@@ -59,17 +75,19 @@ y_{iv} \leq d_i\sum_{j=1}^{n} x_{ijv}, \qquad \forall i \in \{1,...,n\}, \forall
 \sum_{i=1}^{n} y_{iv} \leq q_v, \qquad \forall v \in \{1,...,n\}
 \end{equation}
 
-The function (\ref{min}) minimizes the total delivery cost (distance). The claim (\ref{3rd}) ensures that each city is visited by exactly one courier and the limitation (\ref{4th}) requires that every courier can leave the flower store only once, and the number of couriers visited every city and returning to the store is equal to the number of the couriers leaving. Constraints (\ref{5th}) and (\ref{6th}) guarantee that the amount of cargo delivered by couriers is equal to their demand. And the last requirment (\ref{7th}) ensures that the courier can carry only certain number of cargo (flowers).
+The function (\ref{min}) minimizes the total delivery cost (distance). The claim (\ref{3rd}) ensures that each city is visited by exactly one courier and the limitation (\ref{4th}) requires that every courier can leave the flower store only once, and the number of couriers visited every city and returning to the store is equal to the number of the couriers leaving. Constraints (\ref{5th}) and (\ref{6th}) guarantee that the amount of cargo delivered by courier is equal to city demand. And the last requirement (\ref{7th}) ensures that the courier can carry only certain number of cargo (flowers).
 
-\section{Algorithm}
+\subsection{Algorithm}
 \begin{enumerate}
-  \item First of all, we generate initial population $ P =  \{s_0,s_1,...,s_k\}$. Here we have $k$ solutions that includes set of the couriers with sequence of the cities they serve. 
-  \item Then we find the best solution $F^* = \underset{i}{\text{min}}f(s_i)$/. In our case $f$ is the cost (distance) function with all constraints mentioned above
-  \item Randomly chose 2 parents $s_1$ and $s_2$ from population and apply our crossover operator: $child = C(s_1,s_2)$
-  \item Then we apply mutation operator in order to expand the search area and preserve diversity in the population: $child' = M(child)$
-  \item If $f(child') < F^*$, we update $F^*$. 
-  \item Finally, we append $child$ to our population and remove the worst solution from it. 
-  \item We repeat step 3 to step 6 $t$ times to reach a sufficient number of iterations to find the best solution.
+  \item First of all, we generate initial population $ P =  \{s_0,s_1,...,s_k\}$. Here we have $k$ solutions that includes set of the couriers with sequence of the cities they serve. To generate $s_i$ we randomize distribution so that the courier's cargo does not exceed its capacity.
+  \item Then we select $l <  k$ best solutions from our population $P$ and add them to $ P' =  \{s_0,s_1,...,s_l\}$. In our case we select 50\% solutions.
+  \item Randomly chose 2 parents $s_1$ and $s_2$ from $P'$ and apply our crossover operator: $child = C(s_1,s_2)$. If child is valid and the cargo of each courier does not exceed its capacity we add it to $P'$. We mate solutions until we reach  the size of initial population $P' = P$
+  \item Then we apply mutation operator in order to expand the search area and preserve diversity in the population: $s_i' = M(s_i)$. Mutation operator randomly swaps cities between $courier_1$ and $courier_2$. It is important that the sum of the demand is equal to the sum of the couriers' capacities. So, we have to change cities among couriers such a way to save each one's total cargo (\ref{7th}). In our algorithm we randomly choose from 2 variants: 
+  \begin{enumerate}
+      \item We choose 1 city from each of two couriers: $d_{1|1} = d_{1|2}$, where $d_{i|j}$ is demand of the city $i$ that is served by the courier $j$
+      \item We choose 1 city from 1st courier and 2 cities from 2nd one: $d_{1|1} = d_{1|2} + d_{2|2}$
+  \end{enumerate}
+  \item We repeat step 2 to step 4 $t$ times to reach a sufficient number of iterations to find the best solution.
 \end{enumerate}
 
 \end{document}
